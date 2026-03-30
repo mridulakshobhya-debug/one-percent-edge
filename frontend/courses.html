@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>One Percent Edge | Courses</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/frontend/styles.css" />
+  </head>
+  <body>
+    <div class="noise-layer" aria-hidden="true"></div>
+    <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+    <header class="site-header" id="siteHeader">
+      <nav class="nav-wrap container">
+        <a class="brand" href="/" aria-label="One Percent Edge Home">
+          <span class="brand-mark">1%</span>
+          <span class="brand-text">ONE PERCENT EDGE</span>
+        </a>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
+          <a href="/">Home</a>
+          <a href="/courses">Courses</a>
+          <a href="/ai-agent">AI Agent</a>
+          <a href="/market">Market</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/admin">Admin</a>
+          <button class="btn btn-ghost" id="navLoginBtn" type="button">Login / Sign Up</button>
+          <button class="btn btn-primary" id="navGetStarted" type="button">Get Started</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page-shell">
+      <section class="courses-section container" id="courses">
+        <div class="section-head reveal">
+          <p class="section-eyebrow">Learning Stack</p>
+          <h2>From beginner confidence to institutional thinking</h2>
+        </div>
+
+        <div class="course-filters reveal">
+          <button class="chip active" data-filter="all" type="button">All Tracks</button>
+          <button class="chip" data-filter="foundation" type="button">Foundation</button>
+          <button class="chip" data-filter="analysis" type="button">Analysis</button>
+          <button class="chip" data-filter="ai" type="button">AI + Quant</button>
+        </div>
+
+        <div class="course-grid" id="courseGrid">
+          <article class="course-card reveal tilt-card" data-category="foundation" data-course-id="market-basics">
+            <img src="https://images.unsplash.com/photo-1642543492481-44e81e3914a7?auto=format&fit=crop&w=1200&q=80" alt="Beginner investing workspace" />
+            <div class="course-body">
+              <p>Foundation</p>
+              <h3>Market Basics and Capital Protection</h3>
+              <span class="course-meta-line">6 Weeks | Live + Recorded | Certification</span>
+              <p class="course-desc">
+                Built for first-time investors who want a structured path from zero knowledge to confident, rules-based decision making.
+              </p>
+              <ul class="course-highlights">
+                <li>Decode market structure, index behavior, and stock selection basics</li>
+                <li>Build a personal risk framework with capital protection rules</li>
+                <li>Create your first watchlist, entry checklist, and review journal</li>
+              </ul>
+              <div class="course-foot">
+                <div class="course-foot-meta">
+                  <span>Next Cohort: 20 Apr 2026</span>
+                  <span class="course-price">Free for now</span>
+                </div>
+                <button class="btn btn-outline enroll-course" data-course-id="market-basics" type="button">Enroll Free</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="course-card reveal delay-1 tilt-card" data-category="analysis" data-course-id="earnings-mastery">
+            <img src="https://images.unsplash.com/photo-1518186285589-2f7649de83e0?auto=format&fit=crop&w=1200&q=80" alt="Stock analysis charts on monitor" />
+            <div class="course-body">
+              <p>Analysis</p>
+              <h3>Earnings, Concall and Balance Sheet Mastery</h3>
+              <span class="course-meta-line">8 Weeks | Case Study Lab</span>
+              <p class="course-desc">
+                A deep-dive fundamental track focused on reading financial statements and management commentary like a professional analyst.
+              </p>
+              <ul class="course-highlights">
+                <li>Interpret P&L, cash flow, and balance sheet red flags</li>
+                <li>Extract actionable clues from earnings calls and guidance</li>
+                <li>Value businesses with practical scenario-based templates</li>
+              </ul>
+              <div class="course-foot">
+                <div class="course-foot-meta">
+                  <span>Next Cohort: 27 Apr 2026</span>
+                  <span class="course-price">Free for now</span>
+                </div>
+                <button class="btn btn-outline enroll-course" data-course-id="earnings-mastery" type="button">Enroll Free</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="course-card reveal delay-2 tilt-card" data-category="ai" data-course-id="agentic-research">
+            <img src="https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=1200&q=80" alt="AI and analytics concept visual" />
+            <div class="course-body">
+              <p>AI + Quant</p>
+              <h3>Agentic Research and Strategy Automation</h3>
+              <span class="course-meta-line">10 Weeks | Build AI Trading Copilot</span>
+              <p class="course-desc">
+                For advanced learners who want to combine market research with AI workflows, prompt systems, and data-driven strategy loops.
+              </p>
+              <ul class="course-highlights">
+                <li>Design prompt stacks for research, screening, and thesis checks</li>
+                <li>Build autonomous signal pipelines with quality controls</li>
+                <li>Deploy a portfolio assistant that tracks risk and edge drift</li>
+              </ul>
+              <div class="course-foot">
+                <div class="course-foot-meta">
+                  <span>Next Cohort: 5 May 2026</span>
+                  <span class="course-price">Free for now</span>
+                </div>
+                <button class="btn btn-outline enroll-course" data-course-id="agentic-research" type="button">Enroll Free</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="course-card reveal delay-3 tilt-card" data-category="analysis" data-course-id="sector-rotation">
+            <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=80" alt="Financial planning session" />
+            <div class="course-body">
+              <p>Analysis</p>
+              <h3>Sector Rotation and Event-driven Investing</h3>
+              <span class="course-meta-line">5 Weeks | Model Portfolios</span>
+              <p class="course-desc">
+                Learn how to map macro shifts, policy events, and liquidity cycles into sector-level opportunity frameworks.
+              </p>
+              <ul class="course-highlights">
+                <li>Identify sector leadership changes before broad participation</li>
+                <li>Use catalysts, earnings windows, and policy events for timing</li>
+                <li>Build event playbooks with entry, exit, and invalidation logic</li>
+              </ul>
+              <div class="course-foot">
+                <div class="course-foot-meta">
+                  <span>Next Cohort: 15 May 2026</span>
+                  <span class="course-price">Free for now</span>
+                </div>
+                <button class="btn btn-outline enroll-course" data-course-id="sector-rotation" type="button">Enroll Free</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="course-card reveal delay-4 tilt-card" data-category="foundation" data-course-id="risk-psychology">
+            <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80" alt="Mentorship and financial training" />
+            <div class="course-body">
+              <p>Foundation</p>
+              <h3>Risk, Position Sizing and Trading Psychology</h3>
+              <span class="course-meta-line">4 Weeks | Practical Framework</span>
+              <p class="course-desc">
+                A practical behavior and risk management course designed to help you survive volatility and scale responsibly.
+              </p>
+              <ul class="course-highlights">
+                <li>Apply position sizing models for different market regimes</li>
+                <li>Reduce emotional decisions with pre-commitment frameworks</li>
+                <li>Track performance using expectancy, drawdown, and discipline metrics</li>
+              </ul>
+              <div class="course-foot">
+                <div class="course-foot-meta">
+                  <span>Next Cohort: 22 May 2026</span>
+                  <span class="course-price">Free for now</span>
+                </div>
+                <button class="btn btn-outline enroll-course" data-course-id="risk-psychology" type="button">Enroll Free</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="course-card reveal delay-5 tilt-card" data-category="ai" data-course-id="api-pipelines">
+            <img src="https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&w=1200&q=80" alt="Developer coding a financial platform" />
+            <div class="course-body">
+              <p>AI + Quant</p>
+              <h3>API Data Pipelines and Execution Dashboards</h3>
+              <span class="course-meta-line">7 Weeks | Production Project</span>
+              <p class="course-desc">
+                Hands-on engineering track where you build resilient market data systems and professional monitoring dashboards.
+              </p>
+              <ul class="course-highlights">
+                <li>Stream, validate, and aggregate market events in real time</li>
+                <li>Design fault-tolerant APIs, alerts, and execution views</li>
+                <li>Ship a production-ready capstone with deployment checklist</li>
+              </ul>
+              <div class="course-foot">
+                <div class="course-foot-meta">
+                  <span>Next Cohort: 1 Jun 2026</span>
+                  <span class="course-price">Free for now</span>
+                </div>
+                <button class="btn btn-outline enroll-course" data-course-id="api-pipelines" type="button">Enroll Free</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="learning-section container" id="learning-studio">
+        <div class="section-head reveal">
+          <p class="section-eyebrow">Learning Studio</p>
+          <h2 id="learningCourseTitle">Enroll in a course to unlock guided lessons</h2>
+          <p class="feed-badge" id="learningCourseMeta">Structured lessons with visuals, takeaways, and practice tasks.</p>
+        </div>
+
+        <div class="learning-grid reveal">
+          <aside class="lesson-sidebar">
+            <p class="lesson-progress-text" id="learningProgressText">Progress: 0%</p>
+            <div class="lesson-progress-track">
+              <div class="lesson-progress-fill" id="learningProgressBar"></div>
+            </div>
+            <ul class="lesson-list" id="lessonList">
+              <li>Enroll and login to access lessons.</li>
+            </ul>
+          </aside>
+
+          <article class="lesson-content" id="lessonContent">
+            <img id="lessonImage" src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80" alt="Lesson visual" />
+            <div class="lesson-body">
+              <h3 id="lessonTitle">Your lesson will appear here</h3>
+              <p id="lessonBody">
+                Once you enroll, the studio will show module-wise learning with examples, visual explanations, and practical exercises.
+              </p>
+              <ul id="lessonKeyPoints" class="lesson-points">
+                <li>Concept explanation</li>
+                <li>Visual walkthrough</li>
+                <li>Actionable practice</li>
+              </ul>
+              <p id="lessonTask" class="lesson-task">Practice task: Enroll in any course to begin.</p>
+              <div class="lesson-controls">
+                <button class="btn btn-outline" id="lessonPrevBtn" type="button">Previous</button>
+                <button class="btn btn-primary" id="lessonMarkBtn" type="button">Mark Complete</button>
+                <button class="btn btn-outline" id="lessonNextBtn" type="button">Next</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3>ONE PERCENT EDGE</h3>
+          <p>Build compounding skill with structured courses and an execution-first workflow.</p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <a href="/">Home</a>
+          <a href="/market">Market</a>
+          <a href="/pricing">Pricing</a>
+        </div>
+        <div>
+          <h4>Platform</h4>
+          <a href="/ai-agent">AI Agent</a>
+          <a href="/admin">Admin</a>
+          <a href="/pricing#faq">FAQ</a>
+        </div>
+        <div>
+          <h4>Stay Updated</h4>
+          <form id="newsletterForm" class="newsletter-form">
+            <input id="newsletterEmail" type="email" placeholder="Enter your email" required />
+            <button class="btn btn-primary" type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <p class="copyright">Copyright 2026 ONE PERCENT EDGE. All rights reserved.</p>
+    </footer>
+
+    <div class="modal" id="leadModal" aria-hidden="true" role="dialog" aria-labelledby="leadModalTitle">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-panel">
+        <button class="modal-close" type="button" data-close-modal="true" aria-label="Close">x</button>
+        <p class="section-eyebrow">Get Started</p>
+        <h3 id="leadModalTitle">Reserve Your Onboarding Slot</h3>
+        <form id="leadForm" class="lead-form">
+          <input id="leadName" type="text" placeholder="Full name" required />
+          <input id="leadEmail" type="email" placeholder="Email address" required />
+          <select id="leadRole" required>
+            <option value="">Select your goal</option>
+            <option>Beginner Investor</option>
+            <option>Active Trader</option>
+            <option>Research Analyst</option>
+            <option>Build AI Workflows</option>
+          </select>
+          <textarea id="leadNote" placeholder="What do you want to achieve in the next 90 days?" rows="4"></textarea>
+          <button class="btn btn-primary" type="submit">Start My Journey</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="authModal" aria-hidden="true" role="dialog" aria-labelledby="authModalTitle">
+      <div class="modal-backdrop" id="authBackdrop"></div>
+      <div class="modal-panel auth-panel">
+        <button class="modal-close" id="authCloseBtn" type="button" aria-label="Close">x</button>
+        <p class="section-eyebrow">Course Access</p>
+        <h3 id="authModalTitle">Login or Sign Up to Enroll</h3>
+        <p class="auth-note">All courses are free of cost right now. Login once and continue learning anytime.</p>
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-auth-tab="login" type="button">Login</button>
+          <button class="auth-tab" data-auth-tab="signup" type="button">Sign Up</button>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <input id="loginEmail" type="email" placeholder="Email address" required />
+          <input id="loginPassword" type="password" placeholder="Password" minlength="6" required />
+          <button class="btn btn-primary" type="submit">Login and Enroll</button>
+        </form>
+
+        <form id="signupForm" class="auth-form hidden-auth">
+          <input id="signupName" type="text" placeholder="Full name" required />
+          <input id="signupEmail" type="email" placeholder="Email address" required />
+          <input id="signupPassword" type="password" placeholder="Create password" minlength="6" required />
+          <button class="btn btn-primary" type="submit">Create Account and Enroll</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+    <script src="/frontend/app.js"></script>
+  </body>
+</html>
+

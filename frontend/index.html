@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>One Percent Edge | Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/frontend/styles.css" />
+  </head>
+  <body>
+    <div class="noise-layer" aria-hidden="true"></div>
+    <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+    <header class="site-header" id="siteHeader">
+      <nav class="nav-wrap container">
+        <a class="brand" href="/" aria-label="One Percent Edge Home">
+          <span class="brand-mark">1%</span>
+          <span class="brand-text">ONE PERCENT EDGE</span>
+        </a>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
+          <a href="/">Home</a>
+          <a href="/courses">Courses</a>
+          <a href="/ai-agent">AI Agent</a>
+          <a href="/market">Market</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/admin">Admin</a>
+          <button class="btn btn-ghost" id="navLoginBtn" type="button">Login / Sign Up</button>
+          <button class="btn btn-primary" id="navGetStarted" type="button">Get Started</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" id="home">
+        <img class="hero-image" src="/frontend/background.jpeg" alt="Hero background" />
+        <div class="hero-overlay"></div>
+        <div class="hero-particles" aria-hidden="true"></div>
+
+        <div class="hero-content container">
+          <p class="eyebrow reveal">Financial Intelligence. Engineered for Clarity.</p>
+          <h1 class="reveal delay-1">
+            Build Conviction Faster
+            <span>with Data, AI, and Structured Learning.</span>
+          </h1>
+          <p class="hero-subtext reveal delay-2">
+            A complete operating system for traders and investors: deep learning tracks, AI co-pilot workflows,
+            and live market intelligence in one integrated platform.
+          </p>
+          <div class="hero-actions reveal delay-3">
+            <button class="btn btn-primary btn-xl" id="heroGetStarted" type="button">Get Started</button>
+            <a class="btn btn-outline btn-xl" href="/market">See Live Market</a>
+          </div>
+          <div class="hero-tags reveal delay-4">
+            <span>Zero Jargon</span>
+            <span>AI Agent Support</span>
+            <span>Live Deal Tape</span>
+            <span>Execution Focused</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick-stats container" id="stats">
+        <article class="stat-card reveal tilt-card">
+          <p>Daily Research Notes</p>
+          <h3 data-counter="85">0</h3>
+          <span>Readable breakdowns and premium deep dives</span>
+        </article>
+        <article class="stat-card reveal delay-1 tilt-card">
+          <p>Active Learners</p>
+          <h3 data-counter="32000">0</h3>
+          <span>Investors leveling up with structured systems</span>
+        </article>
+        <article class="stat-card reveal delay-2 tilt-card">
+          <p>AI Mentor Resolutions</p>
+          <h3 data-counter="97">0</h3>
+          <span>Percent guided queries solved in-platform</span>
+        </article>
+        <article class="stat-card reveal delay-3 tilt-card">
+          <p>Platform Uptime</p>
+          <h3 data-counter="99.94">0</h3>
+          <span>Resilient architecture with live monitoring</span>
+        </article>
+      </section>
+
+      <section class="feature-section container" id="features">
+        <div class="section-head reveal">
+          <p class="section-eyebrow">Platform Superpowers</p>
+          <h2>Professional-grade intelligence for modern investors</h2>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card reveal tilt-card">
+            <h3>Structured Learning</h3>
+            <p>From beginner-first concepts to advanced automation, learn in a sequence that compounds your edge.</p>
+            <ul>
+              <li>Foundation, Analysis, AI+Quant tracks</li>
+              <li>Lesson studio with visuals and tasks</li>
+              <li>Login-based progress continuity</li>
+            </ul>
+          </article>
+
+          <article class="feature-card reveal delay-1 tilt-card">
+            <h3>Live Market Layer</h3>
+            <p>Monitor edge signals, deal-style flow, and feed health with professional data views.</p>
+            <ul>
+              <li>Realtime stocks, opportunities, and deal tape</li>
+              <li>Screener + watchlist + alert center</li>
+              <li>Latency and reliability telemetry</li>
+            </ul>
+          </article>
+
+          <article class="feature-card reveal delay-2 tilt-card">
+            <h3>AI + Admin Controls</h3>
+            <p>Run a Groq-powered assistant and exchange-style operations controls from one unified interface.</p>
+            <ul>
+              <li>Context-aware AI responses</li>
+              <li>Market mode and symbol halt controls</li>
+              <li>Audit log and chaos simulation</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="testimonial-section container" id="testimonials">
+        <div class="section-head reveal">
+          <p class="section-eyebrow">Trusted by Operators</p>
+          <h2>Built for people who execute, not just consume</h2>
+        </div>
+
+        <div class="testimonial-slider reveal" id="testimonialSlider">
+          <article class="testimonial active">
+            <p>
+              "The combination of clean research plus AI guidance cut my analysis time by half. I now make decisions with a defined
+              process instead of reacting to noise."
+            </p>
+            <h4>Ravi K. | Full-time Investor</h4>
+          </article>
+          <article class="testimonial">
+            <p>
+              "What stood out is the learning depth. The course tracks are practical and the live intelligence panel gives confidence
+              that the platform is truly alive."
+            </p>
+            <h4>Neha S. | Portfolio Manager</h4>
+          </article>
+          <article class="testimonial">
+            <p>
+              "I came for market notes and stayed for the system. The AI agent + structured curriculum is exactly what a serious
+              learner needs."
+            </p>
+            <h4>Arjun P. | Data-driven Trader</h4>
+          </article>
+        </div>
+
+        <div class="slider-controls reveal delay-1">
+          <button id="prevTestimonial" type="button" aria-label="Previous testimonial">Previous</button>
+          <button id="nextTestimonial" type="button" aria-label="Next testimonial">Next</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3>ONE PERCENT EDGE</h3>
+          <p>Built by humans. Powered by disciplined systems. Designed for compounding decisions.</p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <a href="/">Home</a>
+          <a href="/courses">Courses</a>
+          <a href="/market">Market</a>
+        </div>
+        <div>
+          <h4>Platform</h4>
+          <a href="/ai-agent">AI Agent</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/admin">Admin</a>
+        </div>
+        <div>
+          <h4>Stay Updated</h4>
+          <form id="newsletterForm" class="newsletter-form">
+            <input id="newsletterEmail" type="email" placeholder="Enter your email" required />
+            <button class="btn btn-primary" type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <p class="copyright">Copyright 2026 ONE PERCENT EDGE. All rights reserved.</p>
+    </footer>
+
+    <div class="modal" id="leadModal" aria-hidden="true" role="dialog" aria-labelledby="leadModalTitle">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-panel">
+        <button class="modal-close" type="button" data-close-modal="true" aria-label="Close">x</button>
+        <p class="section-eyebrow">Get Started</p>
+        <h3 id="leadModalTitle">Reserve Your Onboarding Slot</h3>
+        <form id="leadForm" class="lead-form">
+          <input id="leadName" type="text" placeholder="Full name" required />
+          <input id="leadEmail" type="email" placeholder="Email address" required />
+          <select id="leadRole" required>
+            <option value="">Select your goal</option>
+            <option>Beginner Investor</option>
+            <option>Active Trader</option>
+            <option>Research Analyst</option>
+            <option>Build AI Workflows</option>
+          </select>
+          <textarea id="leadNote" placeholder="What do you want to achieve in the next 90 days?" rows="4"></textarea>
+          <button class="btn btn-primary" type="submit">Start My Journey</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="authModal" aria-hidden="true" role="dialog" aria-labelledby="authModalTitle">
+      <div class="modal-backdrop" id="authBackdrop"></div>
+      <div class="modal-panel auth-panel">
+        <button class="modal-close" id="authCloseBtn" type="button" aria-label="Close">x</button>
+        <p class="section-eyebrow">Course Access</p>
+        <h3 id="authModalTitle">Login or Sign Up to Enroll</h3>
+        <p class="auth-note">All courses are free of cost right now. Login once and continue learning anytime.</p>
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-auth-tab="login" type="button">Login</button>
+          <button class="auth-tab" data-auth-tab="signup" type="button">Sign Up</button>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <input id="loginEmail" type="email" placeholder="Email address" required />
+          <input id="loginPassword" type="password" placeholder="Password" minlength="6" required />
+          <button class="btn btn-primary" type="submit">Login and Enroll</button>
+        </form>
+
+        <form id="signupForm" class="auth-form hidden-auth">
+          <input id="signupName" type="text" placeholder="Full name" required />
+          <input id="signupEmail" type="email" placeholder="Email address" required />
+          <input id="signupPassword" type="password" placeholder="Create password" minlength="6" required />
+          <button class="btn btn-primary" type="submit">Create Account and Enroll</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+    <script src="/frontend/app.js"></script>
+  </body>
+</html>
+

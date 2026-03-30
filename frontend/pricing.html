@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>One Percent Edge | Pricing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/frontend/styles.css" />
+  </head>
+  <body>
+    <div class="noise-layer" aria-hidden="true"></div>
+    <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+    <header class="site-header" id="siteHeader">
+      <nav class="nav-wrap container">
+        <a class="brand" href="/" aria-label="One Percent Edge Home">
+          <span class="brand-mark">1%</span>
+          <span class="brand-text">ONE PERCENT EDGE</span>
+        </a>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
+          <a href="/">Home</a>
+          <a href="/courses">Courses</a>
+          <a href="/ai-agent">AI Agent</a>
+          <a href="/market">Market</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/admin">Admin</a>
+          <button class="btn btn-ghost" id="navLoginBtn" type="button">Login / Sign Up</button>
+          <button class="btn btn-primary" id="navGetStarted" type="button">Get Started</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page-shell">
+      <section class="pricing-section container" id="pricing">
+        <div class="section-head reveal">
+          <p class="section-eyebrow">Pricing</p>
+          <h2>Simple plans built for serious progress</h2>
+        </div>
+
+        <div class="billing-toggle reveal">
+          <span>Monthly</span>
+          <label class="switch">
+            <input type="checkbox" id="billingToggle" />
+            <span class="slider"></span>
+          </label>
+          <span>Yearly <em>Save 20%</em></span>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="price-card reveal tilt-card">
+            <p>Starter</p>
+            <h3 data-monthly="30" data-yearly="24">$30</h3>
+            <span>/ month</span>
+            <ul>
+              <li>Readable market insights</li>
+              <li>Basic watchlists</li>
+              <li>Community support</li>
+            </ul>
+            <button
+              class="btn btn-outline"
+              data-plan-action="starter"
+              data-plan-monthly="starter_monthly"
+              data-plan-yearly="starter_monthly"
+              type="button"
+            >
+              Choose Starter
+            </button>
+          </article>
+
+          <article class="price-card featured reveal delay-1 tilt-card">
+            <p>Pro</p>
+            <h3 data-monthly="79" data-yearly="63">$79</h3>
+            <span>/ month</span>
+            <ul>
+              <li>Premium deep dives and concall decode</li>
+              <li>AI agent with live API awareness</li>
+              <li>All courses + weekly mentor office hours</li>
+            </ul>
+            <button
+              class="btn btn-primary"
+              data-plan-action="pro"
+              data-plan-monthly="pro_monthly"
+              data-plan-yearly="pro_yearly"
+              type="button"
+            >
+              Start Pro
+            </button>
+          </article>
+
+          <article class="price-card reveal delay-2 tilt-card">
+            <p>Institutional</p>
+            <h3 data-monthly="199" data-yearly="159">$199</h3>
+            <span>/ month</span>
+            <ul>
+              <li>Multi-seat team workspace</li>
+              <li>Dedicated strategy support</li>
+              <li>Custom API integrations</li>
+            </ul>
+            <button
+              class="btn btn-outline"
+              data-plan-action="institutional"
+              data-plan-monthly="institutional_monthly"
+              data-plan-yearly="institutional_monthly"
+              type="button"
+            >
+              Upgrade Institutional
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <section class="faq-section container" id="faq">
+        <div class="section-head reveal">
+          <p class="section-eyebrow">FAQ</p>
+          <h2>Everything you need before you start</h2>
+        </div>
+
+        <div class="faq-list" id="faqList">
+          <article class="faq-item reveal">
+            <button class="faq-q" type="button">Is this beginner friendly?</button>
+            <div class="faq-a">Yes. You can start from the Foundation track and progress into analysis and AI modules as you gain confidence.</div>
+          </article>
+          <article class="faq-item reveal delay-1">
+            <button class="faq-q" type="button">Do I get live market-linked features?</button>
+            <div class="faq-a">Yes. The Market page reads from backend APIs and surfaces real-time health and opportunity snapshots.</div>
+          </article>
+          <article class="faq-item reveal delay-2">
+            <button class="faq-q" type="button">Can I access premium insights and AI guidance together?</button>
+            <div class="faq-a">Absolutely. Pro and Institutional plans combine premium research with the AI agent and advanced workflows.</div>
+          </article>
+          <article class="faq-item reveal delay-3">
+            <button class="faq-q" type="button">How does the Get Started flow work?</button>
+            <div class="faq-a">Click Get Started, submit your details, and we immediately reserve your onboarding slot and recommended learning path.</div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3>ONE PERCENT EDGE</h3>
+          <p>Choose your plan and scale your market process with confidence.</p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <a href="/">Home</a>
+          <a href="/courses">Courses</a>
+          <a href="/market">Market</a>
+        </div>
+        <div>
+          <h4>Platform</h4>
+          <a href="/ai-agent">AI Agent</a>
+          <a href="/admin">Admin</a>
+          <a href="/pricing#faq">FAQ</a>
+        </div>
+        <div>
+          <h4>Stay Updated</h4>
+          <form id="newsletterForm" class="newsletter-form">
+            <input id="newsletterEmail" type="email" placeholder="Enter your email" required />
+            <button class="btn btn-primary" type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <p class="copyright">Copyright 2026 ONE PERCENT EDGE. All rights reserved.</p>
+    </footer>
+
+    <div class="modal" id="leadModal" aria-hidden="true" role="dialog" aria-labelledby="leadModalTitle">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-panel">
+        <button class="modal-close" type="button" data-close-modal="true" aria-label="Close">x</button>
+        <p class="section-eyebrow">Get Started</p>
+        <h3 id="leadModalTitle">Reserve Your Onboarding Slot</h3>
+        <form id="leadForm" class="lead-form">
+          <input id="leadName" type="text" placeholder="Full name" required />
+          <input id="leadEmail" type="email" placeholder="Email address" required />
+          <select id="leadRole" required>
+            <option value="">Select your goal</option>
+            <option>Beginner Investor</option>
+            <option>Active Trader</option>
+            <option>Research Analyst</option>
+            <option>Build AI Workflows</option>
+          </select>
+          <textarea id="leadNote" placeholder="What do you want to achieve in the next 90 days?" rows="4"></textarea>
+          <button class="btn btn-primary" type="submit">Start My Journey</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="paymentModal" aria-hidden="true" role="dialog" aria-labelledby="paymentModalTitle">
+      <div class="modal-backdrop" id="paymentBackdrop"></div>
+      <div class="modal-panel payment-panel">
+        <button class="modal-close" id="paymentCloseBtn" type="button" aria-label="Close">x</button>
+        <p class="section-eyebrow">Payment Gateway</p>
+        <h3 id="paymentModalTitle">Upgrade to Premium Access</h3>
+        <p class="auth-note">
+          Plan: <strong id="paymentPlanLabel">Pro Monthly</strong> |
+          Amount: <strong id="paymentAmount">INR 0</strong>
+        </p>
+        <form id="paymentForm" class="auth-form">
+          <input id="paymentPayerName" type="text" placeholder="Payer name" required />
+          <select id="paymentMethod" required>
+            <option value="card">Card</option>
+            <option value="upi">UPI</option>
+            <option value="netbanking">Net Banking</option>
+          </select>
+          <button class="btn btn-primary" id="paymentSubmitBtn" type="submit">Pay and Upgrade</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="authModal" aria-hidden="true" role="dialog" aria-labelledby="authModalTitle">
+      <div class="modal-backdrop" id="authBackdrop"></div>
+      <div class="modal-panel auth-panel">
+        <button class="modal-close" id="authCloseBtn" type="button" aria-label="Close">x</button>
+        <p class="section-eyebrow">Course Access</p>
+        <h3 id="authModalTitle">Login or Sign Up to Enroll</h3>
+        <p class="auth-note">All courses are free of cost right now. Login once and continue learning anytime.</p>
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-auth-tab="login" type="button">Login</button>
+          <button class="auth-tab" data-auth-tab="signup" type="button">Sign Up</button>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <input id="loginEmail" type="email" placeholder="Email address" required />
+          <input id="loginPassword" type="password" placeholder="Password" minlength="6" required />
+          <button class="btn btn-primary" type="submit">Login and Enroll</button>
+        </form>
+
+        <form id="signupForm" class="auth-form hidden-auth">
+          <input id="signupName" type="text" placeholder="Full name" required />
+          <input id="signupEmail" type="email" placeholder="Email address" required />
+          <input id="signupPassword" type="password" placeholder="Create password" minlength="6" required />
+          <button class="btn btn-primary" type="submit">Create Account and Enroll</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+    <script src="/frontend/app.js"></script>
+  </body>
+</html>
+
