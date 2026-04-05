@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "runtime": "python3.12"
+      }
+    },
+    {
+      "src": "frontend/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/frontend/(.*)",
+      "dest": "/frontend/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.py"
+    }
+  ],
+  "env": {
+    "UPSTASH_REDIS_REST_URL": "@UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN": "@UPSTASH_REDIS_REST_TOKEN",
+    "AUTH_SESSION_SECRET": "@AUTH_SESSION_SECRET",
+    "AUTH_PASSWORD_SALT": "@AUTH_PASSWORD_SALT",
+    "ADMIN_EMAILS": "@ADMIN_EMAILS",
+    "ADMIN_PANEL_KEY": "@ADMIN_PANEL_KEY",
+    "GROQ_API_KEY": "@GROQ_API_KEY",
+    "GOOGLE_CLIENT_ID": "@GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET": "@GOOGLE_CLIENT_SECRET",
+    "GITHUB_CLIENT_ID": "@GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET": "@GITHUB_CLIENT_SECRET",
+    "FACEBOOK_CLIENT_ID": "@FACEBOOK_CLIENT_ID",
+    "FACEBOOK_CLIENT_SECRET": "@FACEBOOK_CLIENT_SECRET"
+  }
+}

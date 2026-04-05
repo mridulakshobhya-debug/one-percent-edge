@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>One Percent Edge | Admin Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/frontend/styles.css" />
+  </head>
+  <body>
+    <div class="noise-layer" aria-hidden="true"></div>
+
+    <header class="site-header" id="siteHeader">
+      <nav class="nav-wrap container">
+        <a class="brand" href="/" aria-label="One Percent Edge Home">
+          <span class="brand-mark">1%</span>
+          <span class="brand-text">ONE PERCENT EDGE</span>
+        </a>
+        <div class="nav-links" id="navLinks">
+          <a href="/">Home</a>
+          <a href="/market">Market</a>
+          <a class="active" href="/admin-login">Admin Login</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page-shell">
+      <section class="admin-section container">
+        <div class="section-head">
+          <p class="section-eyebrow">Admin Authentication</p>
+          <h2>Login to access the admin dashboard</h2>
+          <p class="feed-badge">Only configured admin emails can access user and contact data.</p>
+        </div>
+
+        <article class="admin-card" style="max-width: 680px; margin: 0 auto">
+          <h3>Admin Login</h3>
+          <p class="admin-muted">Use your admin email and password.</p>
+          <form id="adminLoginForm" class="admin-form-grid">
+            <input id="adminEmail" type="email" placeholder="Admin email" autocomplete="username" required />
+            <input id="adminPassword" type="password" placeholder="Password" autocomplete="current-password" minlength="6" required />
+            <button class="btn btn-primary" id="adminLoginBtn" type="submit">Login to Admin Dashboard</button>
+          </form>
+          <p class="admin-note">Configure allowed admin emails in backend with <code>ADMIN_EMAILS</code>.</p>
+          <p id="adminLoginMessage" class="admin-muted"></p>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        "use strict";
+
+        const API_BASE = location.port === "8000" ? "" : "http://127.0.0.1:8000";
+        const form = document.getElementById("adminLoginForm");
+        const emailInput = document.getElementById("adminEmail");
+        const passwordInput = document.getElementById("adminPassword");
+        const loginBtn = document.getElementById("adminLoginBtn");
+        const messageNode = document.getElementById("adminLoginMessage");
+
+        function apiUrl(path) {
+          return `${API_BASE}${path}`;
+        }
+
+        function setMessage(text, isError = false) {
+          if (!messageNode) return;
+          messageNode.textContent = text;
+          messageNode.style.color = isError ? "#ff9dae" : "";
+        }
+
+        async function checkExistingSession() {
+          try {
+            const response = await fetch(apiUrl("/auth/session"), {
+              cache: "no-store",
+              credentials: "include",
+            });
+            if (!response.ok) return;
+            const payload = await response.json();
+            const role = String(payload?.user?.role || "").toLowerCase();
+            if (payload?.authenticated && role === "admin") {
+              window.location.href = "/admin";
+            }
+          } catch {
+            // keep login form visible
+          }
+        }
+
+        form?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const email = String(emailInput?.value || "").trim().toLowerCase();
+          const password = String(passwordInput?.value || "");
+          if (!email || password.length < 6) {
+            setMessage("Enter a valid admin email and password.", true);
+            return;
+          }
+
+          if (loginBtn) loginBtn.disabled = true;
+          setMessage("Authenticating...");
+          try {
+            const response = await fetch(apiUrl("/auth/admin-login"), {
+              method: "POST",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              const detail = String(payload.detail || payload.error || "Admin login failed.");
+              throw new Error(detail);
+            }
+            window.location.href = "/admin";
+          } catch (error) {
+            setMessage(String(error?.message || "Admin login failed."), true);
+          } finally {
+            if (loginBtn) loginBtn.disabled = false;
+          }
+        });
+
+        checkExistingSession();
+      })();
+    </script>
+  </body>
+</html>

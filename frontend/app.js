@@ -129,6 +129,11 @@
   const loginForm = qs("#loginForm");
   const signupForm = qs("#signupForm");
 
+  const promoModal = qs("#promoModal");
+  const promoBackdrop = qs("#promoBackdrop");
+  const promoCloseBtn = qs("#promoCloseBtn");
+  const promoActionBtn = qs("#promoActionBtn");
+
   const sectionNodes = qsa("main section[id]");
   const API_BASE = (() => {
     if (location.port === "8000") return "";
@@ -724,6 +729,10 @@
     return Boolean(state.authUser && state.authUser.premium);
   }
 
+  function isAdminUser() {
+    return String(state.authUser?.role || "").toLowerCase() === "admin";
+  }
+
   function isCourseEnrolled(courseId) {
     return state.enrolledCourses.includes(courseId);
   }
@@ -749,16 +758,22 @@
     if (!navLoginBtn) return;
     if (isLoggedIn()) {
       const firstName = String(state.authUser.name || "Learner").split(" ")[0];
-      navLoginBtn.textContent = isPremiumUser() ? `Logout (${firstName} | Pro)` : `Logout (${firstName})`;
+      if (isAdminUser()) {
+        navLoginBtn.textContent = `Logout (${firstName} | Admin)`;
+      } else {
+        navLoginBtn.textContent = isPremiumUser() ? `Logout (${firstName} | Pro)` : `Logout (${firstName})`;
+      }
     } else {
       navLoginBtn.textContent = "Login / Sign Up";
     }
     if (marketPremiumStatus) {
-      marketPremiumStatus.textContent = isLoggedIn()
-        ? isPremiumUser()
-          ? "Premium active"
-          : "Free plan"
-        : "Login required";
+      if (!isLoggedIn()) {
+        marketPremiumStatus.textContent = "Login required";
+      } else if (isAdminUser()) {
+        marketPremiumStatus.textContent = "Admin account";
+      } else {
+        marketPremiumStatus.textContent = isPremiumUser() ? "Premium active" : "Free plan";
+      }
     }
   }
 
@@ -839,17 +854,23 @@
     buttonsWrap.className = "oauth-buttons";
     buttonsWrap.innerHTML = `
       <button class="oauth-btn" type="button" data-oauth-provider="google">
-        <span class="oauth-icon google">G</span>
+        <span class="oauth-icon google">
+          <img class="oauth-icon-image" src="/frontend/images/google.png" alt="Google" />
+        </span>
         <span>Continue with Google</span>
         <small class="oauth-hint"></small>
       </button>
       <button class="oauth-btn" type="button" data-oauth-provider="github">
-        <span class="oauth-icon github">GH</span>
+        <span class="oauth-icon github">
+          <img class="oauth-icon-image" src="/frontend/images/github.png" alt="GitHub" />
+        </span>
         <span>Continue with GitHub</span>
         <small class="oauth-hint"></small>
       </button>
       <button class="oauth-btn" type="button" data-oauth-provider="facebook">
-        <span class="oauth-icon facebook">f</span>
+        <span class="oauth-icon facebook">
+          <img class="oauth-icon-image" src="/frontend/images/facebook.png" alt="Facebook" />
+        </span>
         <span>Continue with Facebook</span>
         <small class="oauth-hint"></small>
       </button>
@@ -915,12 +936,14 @@
           email: String(user.email || ""),
           provider: String(user.provider || ""),
           avatar: String(user.avatar || ""),
+          role: String(user.role || "user"),
           premium: Boolean(user.premium),
           plan: String(user.plan || ""),
         };
         persistUserState();
       } else if (state.authUser) {
         state.authUser = null;
+        state.adminReady = false;
         persistUserState();
       }
     } catch {
@@ -1016,6 +1039,7 @@
           email: String(user.email || email),
           provider: String(user.provider || "email"),
           avatar: String(user.avatar || ""),
+          role: String(user.role || "user"),
           premium: Boolean(user.premium),
           plan: String(user.plan || ""),
         };
@@ -1054,6 +1078,7 @@
           email: String(user.email || email),
           provider: String(user.provider || "email"),
           avatar: String(user.avatar || ""),
+          role: String(user.role || "user"),
           premium: Boolean(user.premium),
           plan: String(user.plan || ""),
         };
@@ -1287,6 +1312,7 @@
             // local signout fallback still applies
           }
           state.authUser = null;
+          state.adminReady = false;
           localStorage.removeItem("ope_pending_course");
           persistUserState();
           updateAuthUi();
@@ -1654,6 +1680,15 @@
       state.stockUpdates = Array.isArray(payload.items) ? payload.items : [];
       state.lockedUpdateCount = Number(payload.locked_count || 0);
       const premiumActive = Boolean(payload.premium_active);
+      const adminOnly = Boolean(payload.admin_only);
+      if (adminOnly) {
+        state.stockUpdates = [];
+        state.lockedUpdateCount = Number(payload.locked_count || 0);
+        renderMarketUpdatesList([], 0);
+        if (marketPremiumStatus) marketPremiumStatus.textContent = "Admin updates are hidden for user accounts";
+        if (marketUpgradeBtn) marketUpgradeBtn.style.display = "none";
+        return;
+      }
       state.authUser = {
         ...(state.authUser || {}),
         premium: premiumActive,
@@ -1724,6 +1759,7 @@
           email: String(user.email || state.authUser?.email || ""),
           provider: String(user.provider || state.authUser?.provider || "email"),
           avatar: String(user.avatar || state.authUser?.avatar || ""),
+          role: String(user.role || state.authUser?.role || "user"),
           premium: Boolean(user.premium),
           plan: String(user.plan || ""),
         };
@@ -1851,10 +1887,9 @@
 
   async function fetchAdmin(path, options = {}) {
     const key = String(state.adminKey || "").trim();
-    if (!key) throw new Error("ADMIN_KEY_MISSING");
 
     const headers = {
-      "x-admin-key": key,
+      ...(key ? { "x-admin-key": key } : {}),
       ...(options.body ? { "Content-Type": "application/json" } : {}),
       ...(options.headers || {}),
     };
@@ -1864,6 +1899,7 @@
       body: options.body,
       headers,
       cache: "no-store",
+      credentials: "include",
     });
 
     const payload = await response.json().catch(() => ({}));
@@ -1897,7 +1933,7 @@
     if (!adminUsersBody) return;
     const list = Array.isArray(items) ? items : [];
     if (!list.length) {
-      adminUsersBody.innerHTML = '<tr><td colspan="7">No users available yet.</td></tr>';
+      adminUsersBody.innerHTML = '<tr><td colspan="11">No users available yet.</td></tr>';
       return;
     }
 
@@ -1905,13 +1941,20 @@
     list.slice(0, 300).forEach((user) => {
       const tr = document.createElement("tr");
       const premium = Boolean(user.premium);
+      const contactRole = String(user.contact_role || "--");
+      const contactNote = String(user.contact_note || "--");
+      const lastContactAt = Number(user.last_contact_at || 0);
       tr.innerHTML = `
         <td>${String(user.name || "Learner")}</td>
         <td>${String(user.email || "--")}</td>
+        <td>${String(user.role || "user")}</td>
         <td>${String(user.provider || "email")}</td>
         <td>${premium ? "Yes" : "No"}</td>
         <td>${String(user.plan || "--")}</td>
         <td>${new Date(Number(user.last_login) || Date.now()).toLocaleString("en-IN")}</td>
+        <td>${contactRole}</td>
+        <td>${contactNote}</td>
+        <td>${lastContactAt ? new Date(lastContactAt).toLocaleString("en-IN") : "--"}</td>
         <td><button class="btn btn-outline" type="button" data-admin-premium-email="${String(user.email || "")}" data-admin-premium-next="${premium ? "false" : "true"}">${premium ? "Revoke" : "Grant Pro"}</button></td>
       `;
       adminUsersBody.appendChild(tr);
@@ -2049,10 +2092,15 @@
       setAdminControlsEnabled(true);
     } catch (error) {
       const detail = String(error?.message || "");
-      if (detail.toLowerCase().includes("unauthorized")) {
+      const unauthorized = detail.toLowerCase().includes("unauthorized") || detail.toLowerCase().includes("authentication required");
+      if (unauthorized) {
         state.adminReady = false;
         setAdminControlsEnabled(false);
-        if (adminAccessStatus) adminAccessStatus.textContent = "Admin key rejected. Enter a valid key.";
+        if (adminAccessStatus) {
+          adminAccessStatus.textContent = isAdminUser()
+            ? "Admin session is not active. Login again from /admin-login."
+            : "Admin key rejected. Enter a valid key or use /admin-login.";
+        }
       }
       if (!silent) showToast("Admin console sync failed. Check key/backend.", "error");
     }
@@ -2062,6 +2110,13 @@
     if (!adminUnlockBtn) return;
 
     setAdminControlsEnabled(false);
+    if (isAdminUser()) {
+      state.adminReady = true;
+      if (adminAccessStatus) adminAccessStatus.textContent = "Admin session detected. Syncing dashboard...";
+      refreshAdminConsole(true);
+    } else if (adminAccessStatus) {
+      adminAccessStatus.textContent = "Locked. Login from /admin-login or enter admin key.";
+    }
 
     const unlock = async () => {
       const key = String(adminKeyInput?.value || "").trim();
@@ -2197,7 +2252,7 @@
       }
     });
 
-    if (state.adminKey) {
+    if (!state.adminReady && state.adminKey) {
       state.adminReady = true;
       refreshAdminConsole(true);
     }
@@ -2713,6 +2768,53 @@
     state.adminPollTimer = setInterval(() => refreshAdminConsole(true), 7000);
   }
 
+  function openPromoModal() {
+    if (!promoModal) return;
+    promoModal.classList.add("is-open");
+    promoModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closePromoModal() {
+    if (!promoModal) return;
+    promoModal.classList.remove("is-open");
+    promoModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    localStorage.setItem("promo_modal_closed", new Date().toISOString());
+  }
+
+  function setPromoHandlers() {
+    if (!promoModal) return;
+
+    promoCloseBtn?.addEventListener("click", closePromoModal);
+    promoBackdrop?.addEventListener("click", closePromoModal);
+
+    promoActionBtn?.addEventListener("click", () => {
+      openAuthModal(null);
+      closePromoModal();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && promoModal.classList.contains("is-open")) {
+        closePromoModal();
+      }
+    });
+
+    // Show promo after 2 seconds (reduced from 3 for testing), but only if not closed recently
+    const lastClosed = localStorage.getItem("promo_modal_closed");
+    const now = new Date();
+    const shouldShow =
+      !lastClosed ||
+      new Date(lastClosed).getTime() < now.getTime() - 24 * 60 * 60 * 1000;
+
+    if (shouldShow) {
+      setTimeout(openPromoModal, 1500);
+    }
+
+    // Manual trigger for testing: type 'showpromo' to display modal
+    window.showpromo = openPromoModal;
+  }
+
   async function init() {
     loadUserState();
     await syncAuthSession();
@@ -2727,6 +2829,7 @@
     setCounterObserver();
     setTiltCards();
     setModalHandlers();
+    setPromoHandlers();
     setNewsletter();
     setCourseFilters();
     setFaq();

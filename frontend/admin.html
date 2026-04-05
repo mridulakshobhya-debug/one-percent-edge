@@ -52,12 +52,14 @@
         <div class="admin-grid">
           <article class="admin-card reveal tilt-card">
             <h3>Access</h3>
-            <p class="admin-muted" id="adminAccessStatus">Locked. Enter admin key to enable controls.</p>
+            <p class="admin-muted" id="adminAccessStatus">Locked. Login via admin portal or enter admin key.</p>
             <div class="admin-input-row">
               <input id="adminKeyInput" type="password" placeholder="Enter admin key" autocomplete="off" />
               <button class="btn btn-primary" id="adminUnlockBtn" type="button">Unlock</button>
             </div>
-            <p class="admin-note">Default key fallback: <code>ope-admin</code> (configure <code>ADMIN_PANEL_KEY</code> in backend).</p>
+            <p class="admin-note">
+              Primary access: <a href="/admin-login">Admin Login</a>. Fallback key: <code>ADMIN_PANEL_KEY</code>.
+            </p>
           </article>
 
           <article class="admin-card reveal delay-1 tilt-card">
@@ -114,16 +116,20 @@
                   <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Role</th>
                     <th>Provider</th>
                     <th>Premium</th>
                     <th>Plan</th>
                     <th>Last Login</th>
+                    <th>Contact Role</th>
+                    <th>Contact Note</th>
+                    <th>Last Contact</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="adminUsersBody">
                   <tr>
-                    <td colspan="7">Unlock admin access to load users.</td>
+                    <td colspan="11">Unlock admin access to load users.</td>
                   </tr>
                 </tbody>
               </table>
@@ -268,6 +274,31 @@
           <input id="signupPassword" type="password" placeholder="Create password" minlength="6" required />
           <button class="btn btn-primary" type="submit">Create Account and Enroll</button>
         </form>
+      </div>
+    </div>
+
+    <div class="modal" id="promoModal" aria-hidden="true" role="dialog" aria-labelledby="promoTitle">
+      <div class="modal-backdrop" id="promoBackdrop"></div>
+      <div class="modal-panel promo-panel">
+        <button class="modal-close" id="promoCloseBtn" type="button" aria-label="Close">×</button>
+        <div class="promo-badge">⏳ Limited Time Offer</div>
+        <h3 id="promoTitle" class="promo-title">
+          <span class="promo-title-main">Get Premium Access</span>
+          <span class="promo-title-accent">50% OFF</span>
+        </h3>
+        <p class="promo-subtitle">All courses unlocked. Advanced tools included.</p>
+        <div class="promo-price">
+          <span class="promo-price-old">$99<span class="promo-period">/year</span></span>
+          <span class="promo-price-new">$49<span class="promo-period">/year</span></span>
+        </div>
+        <div class="promo-features">
+          <div class="promo-feature">✓ All 15 Courses Included</div>
+          <div class="promo-feature">✓ Advanced Market Screener</div>
+          <div class="promo-feature">✓ AI Research Agent</div>
+          <div class="promo-feature">✓ Live Market Engine</div>
+        </div>
+        <button class="btn btn-primary promo-btn" id="promoActionBtn" type="button">Claim 50% Discount Now</button>
+        <p class="promo-note">Offer expires in <span id="promoTimer">2 days</span></p>
       </div>
     </div>
 
