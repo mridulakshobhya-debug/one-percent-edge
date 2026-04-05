@@ -135,10 +135,10 @@
   const promoActionBtn = qs("#promoActionBtn");
 
   const sectionNodes = qsa("main section[id]");
-  const API_BASE = (() => {
-    if (location.port === "8000") return "";
-    return "http://127.0.0.1:8000";
-  })();
+  // Use relative paths for API calls: works in both local dev and Vercel deployment
+  // - Local dev: Frontend and backend on same origin (localhost:PORT)
+  // - Vercel: Frontend and API on same domain (your-project.vercel.app)
+  const API_BASE = "";
 
   const state = {
     testimonialIndex: 0,
