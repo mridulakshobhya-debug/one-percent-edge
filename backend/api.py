@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field
 from starlette.middleware.sessions import SessionMiddleware
 
 from backend.engine import MarketEngine
+from backend.kv_adapter import kv
 
 
 app = FastAPI(title="ONE PERCENT EDGE - QUANT OPERATING SYSTEM")
@@ -54,10 +55,55 @@ PREMIUM_PLANS = {
     "institutional_monthly": {"label": "Institutional Monthly", "amount_inr": 199, "premium": True},
     "starter_monthly": {"label": "Starter Monthly", "amount_inr": 30, "premium": False},
 }
+ROLE_USER = "user"
+ROLE_ADMIN = "admin"
+
+# Initialize persistent storage (KV-backed or in-memory fallback)
 USERS_DB: Dict[str, Dict[str, Any]] = {}
 CONTACTS_DB: List[Dict[str, Any]] = []
 STOCK_UPDATES_DB: Dict[str, Dict[str, Any]] = {}
 PAYMENTS_DB: Dict[str, Dict[str, Any]] = {}
+
+# Load from KV storage on startup (will load from in-memory for local dev)
+async def _load_persistent_data() -> None:
+    """Load persistent data from KV storage into memory for this function invocation."""
+    global USERS_DB, CONTACTS_DB, STOCK_UPDATES_DB, PAYMENTS_DB
+    
+    try:
+        # Load users
+        users_data = kv.get_sync("db:users")
+        if users_data and isinstance(users_data, dict):
+            USERS_DB = users_data
+        
+        # Load contacts
+        contacts_data = kv.get_sync("db:contacts")
+        if contacts_data and isinstance(contacts_data, list):
+            CONTACTS_DB = contacts_data
+        
+        # Load stock updates
+        updates_data = kv.get_sync("db:stock_updates")
+        if updates_data and isinstance(updates_data, dict):
+            STOCK_UPDATES_DB = updates_data
+        
+        # Load payments
+        payments_data = kv.get_sync("db:payments")
+        if payments_data and isinstance(payments_data, dict):
+            PAYMENTS_DB = payments_data
+    except Exception:
+        pass  # Fallback to in-memory if KV fails
+
+
+async def _persist_data() -> None:
+    """Persist current database state to KV storage."""
+    try:
+        kv.set_sync("db:users", USERS_DB)
+        kv.set_sync("db:contacts", CONTACTS_DB)
+        kv.set_sync("db:stock_updates", STOCK_UPDATES_DB)
+        kv.set_sync("db:payments", PAYMENTS_DB)
+    except Exception:
+        pass  # Silently fail if KV storage unavailable
+
+
 DB_LOCK = asyncio.Lock()
 
 
@@ -84,6 +130,11 @@ class EmailSignupRequest(BaseModel):
 
 
 class EmailLoginRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=180)
+    password: str = Field(min_length=6, max_length=128)
+
+
+class AdminEmailLoginRequest(BaseModel):
     email: str = Field(min_length=5, max_length=180)
     password: str = Field(min_length=6, max_length=128)
 
@@ -173,12 +224,38 @@ def _safe_plan(raw_plan: str) -> str:
     return plan if plan in PREMIUM_PLANS else "pro_monthly"
 
 
+def _admin_email_set() -> set[str]:
+    raw = _read_env("ADMIN_EMAILS", "admin@onepercentedge.local")
+    return {_normalize_email(item) for item in raw.split(",") if _normalize_email(item)}
+
+
+def _derive_user_role(email: str, current_role: str = "") -> str:
+    normalized_role = str(current_role or "").strip().lower()
+    if normalized_role == ROLE_ADMIN:
+        return ROLE_ADMIN
+    return ROLE_ADMIN if _normalize_email(email) in _admin_email_set() else ROLE_USER
+
+
+def _is_admin_user(user: Dict[str, Any]) -> bool:
+    email = _normalize_email(user.get("email") or "")
+    role = _derive_user_role(email, str(user.get("role") or ""))
+    return role == ROLE_ADMIN
+
+
+def _is_admin_session(request: Request) -> bool:
+    session_user = request.session.get("auth_user") or {}
+    return _is_admin_user(session_user)
+
+
 def _session_user_from_record(record: Dict[str, Any]) -> Dict[str, Any]:
+    email = _normalize_email(record.get("email") or "")
+    role = _derive_user_role(email, str(record.get("role") or ""))
     return {
         "name": str(record.get("name") or "Learner"),
-        "email": str(record.get("email") or ""),
+        "email": email,
         "provider": str(record.get("provider") or "email"),
         "avatar": str(record.get("avatar") or ""),
+        "role": role,
         "premium": bool(record.get("premium")),
         "plan": str(record.get("plan") or ""),
         "updated_at": int(record.get("updated_at") or _now_ms()),
@@ -186,9 +263,12 @@ def _session_user_from_record(record: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _public_user_record(record: Dict[str, Any]) -> Dict[str, Any]:
+    email = _normalize_email(record.get("email") or "")
+    role = _derive_user_role(email, str(record.get("role") or ""))
     return {
         "name": str(record.get("name") or "Learner"),
-        "email": str(record.get("email") or ""),
+        "email": email,
+        "role": role,
         "provider": str(record.get("provider") or "email"),
         "premium": bool(record.get("premium")),
         "plan": str(record.get("plan") or ""),
@@ -214,11 +294,13 @@ async def _upsert_user(
     async with DB_LOCK:
         record = USERS_DB.get(email_clean)
         if not record:
+            role = _derive_user_role(email_clean)
             record = {
                 "email": email_clean,
                 "name": str(name or "Learner").strip() or "Learner",
                 "provider": str(provider or "email"),
                 "avatar": str(avatar or ""),
+                "role": role,
                 "password_hash": str(password_hash or ""),
                 "premium": False,
                 "plan": "",
@@ -229,6 +311,7 @@ async def _upsert_user(
             }
             USERS_DB[email_clean] = record
         else:
+            record["role"] = _derive_user_role(email_clean, str(record.get("role") or ""))
             if name:
                 record["name"] = str(name).strip() or record.get("name") or "Learner"
             if avatar:
@@ -239,7 +322,11 @@ async def _upsert_user(
                 record["password_hash"] = str(password_hash)
             record["last_login"] = now
             record["updated_at"] = now
-        return dict(record)
+        result = dict(record)
+    
+    # Persist after DB lock is released
+    await _persist_data()
+    return result
 
 
 async def _set_user_premium(email: str, premium: bool, plan: str) -> Dict[str, Any]:
@@ -256,7 +343,11 @@ async def _set_user_premium(email: str, premium: bool, plan: str) -> Dict[str, A
         record["plan"] = plan_safe if premium else ""
         record["updated_at"] = now
         USERS_DB[email_clean] = record
-        return dict(record)
+        result = dict(record)
+    
+    # Persist after DB lock is released
+    await _persist_data()
+    return result
 
 
 async def _require_session_user(request: Request) -> Dict[str, Any]:
@@ -267,11 +358,13 @@ async def _require_session_user(request: Request) -> Dict[str, Any]:
     async with DB_LOCK:
         record = USERS_DB.get(email)
         if not record:
+            role = _derive_user_role(email, str(session_user.get("role") or ""))
             record = {
                 "email": email,
                 "name": str(session_user.get("name") or "Learner"),
                 "provider": str(session_user.get("provider") or "email"),
                 "avatar": str(session_user.get("avatar") or ""),
+                "role": role,
                 "password_hash": "",
                 "premium": bool(session_user.get("premium")),
                 "plan": str(session_user.get("plan") or ""),
@@ -282,9 +375,13 @@ async def _require_session_user(request: Request) -> Dict[str, Any]:
             }
             USERS_DB[email] = record
         else:
+            record["role"] = _derive_user_role(email, str(record.get("role") or ""))
             record["last_login"] = _now_ms()
             record["updated_at"] = _now_ms()
         synced = _session_user_from_record(record)
+    
+    # Persist after DB lock is released
+    await _persist_data()
     request.session["auth_user"] = synced
     return synced
 
@@ -298,10 +395,15 @@ async def _capture_contact(entry: Dict[str, Any]) -> Dict[str, Any]:
         if email and email in USERS_DB:
             USERS_DB[email]["contact_count"] = int(USERS_DB[email].get("contact_count") or 0) + 1
             USERS_DB[email]["updated_at"] = now
+    
+    # Persist after DB lock is released
+    await _persist_data()
     return contact
 
 
 def _require_admin(request: Request) -> None:
+    if _is_admin_session(request):
+        return
     expected = _read_env("ADMIN_PANEL_KEY", "ope-admin")
     provided = str(request.headers.get("x-admin-key", "")).strip()
     if not expected:
@@ -332,7 +434,7 @@ def _provider_enabled(provider: str) -> bool:
 
 
 def _oauth_dev_bypass_enabled() -> bool:
-    return _env_flag("OAUTH_DEV_BYPASS", default=True)
+    return _env_flag("OAUTH_DEV_BYPASS", default=False)
 
 
 def _oauth_dev_user(provider: str) -> Dict[str, Any]:
@@ -598,15 +700,23 @@ def _call_groq_chat(
 
 @app.on_event("startup")
 async def on_startup() -> None:
+    # Load persistent data from KV storage
+    await _load_persistent_data()
+    
     await engine.start()
     if STOCK_UPDATES_DB:
+        # Data was loaded from KV store
+        await _persist_data()
         return
+    
     snapshot = await engine.get_stocks_snapshot()
     picks = [str(item.get("symbol") or "").upper() for item in (snapshot.get("items") or [])[:4] if item.get("symbol")]
     seed_symbols = picks or ["RELIANCE", "TCS", "INFY", "HDFCBANK"]
     now = _now_ms()
     async with DB_LOCK:
         if STOCK_UPDATES_DB:
+            # Data was loaded from KV store
+            await _persist_data()
             return
         for idx, symbol in enumerate(seed_symbols):
             update_id = secrets.token_urlsafe(10)
@@ -624,16 +734,21 @@ async def on_startup() -> None:
                 "updated_at": now,
                 "version": 1,
             }
+    
+    # Persist seeded data to KV store
+    await _persist_data()
 
 
 @app.on_event("shutdown")
 async def on_shutdown() -> None:
+    # Save all data before shutdown
+    await _persist_data()
     await engine.stop()
 
 
 @app.middleware("http")
 async def chaos_http_middleware(request: Request, call_next):
-    passthrough_paths = {"/", "/favicon.ico", "/courses", "/ai-agent", "/market", "/pricing", "/admin"}
+    passthrough_paths = {"/", "/favicon.ico", "/courses", "/ai-agent", "/market", "/pricing", "/admin", "/admin-login"}
     is_static = request.url.path.startswith("/frontend")
     is_admin = request.url.path.startswith("/admin")
     is_chat = request.url.path == "/chat" or request.url.path.startswith("/chat/")
@@ -708,8 +823,15 @@ async def pricing_page() -> FileResponse:
 
 
 @app.get("/admin")
-async def admin_page() -> FileResponse:
+async def admin_page(request: Request) -> Any:
+    if not _is_admin_session(request):
+        return RedirectResponse("/admin-login", status_code=302)
     return _serve_frontend_page("admin.html")
+
+
+@app.get("/admin-login")
+async def admin_login_page() -> FileResponse:
+    return _serve_frontend_page("admin-login.html")
 
 
 app.mount("/frontend", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
@@ -798,6 +920,8 @@ async def auth_email_signup(request: Request, payload: EmailSignupRequest) -> Di
     email = _normalize_email(payload.email)
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="Enter a valid email")
+    if _derive_user_role(email) == ROLE_ADMIN:
+        raise HTTPException(status_code=403, detail="This email is reserved for admin login")
 
     password_hash = _hash_password(payload.password)
     async with DB_LOCK:
@@ -823,6 +947,8 @@ async def auth_email_login(request: Request, payload: EmailLoginRequest) -> Dict
     email = _normalize_email(payload.email)
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="Enter a valid email")
+    if _derive_user_role(email) == ROLE_ADMIN:
+        raise HTTPException(status_code=403, detail="Use admin login for this account")
 
     candidate_hash = _hash_password(payload.password)
     async with DB_LOCK:
@@ -839,6 +965,45 @@ async def auth_email_login(request: Request, payload: EmailLoginRequest) -> Dict
         avatar=str(record.get("avatar") or ""),
     )
     session_user = _session_user_from_record(synced)
+    request.session["auth_user"] = session_user
+    return {"ok": True, "user": session_user}
+
+
+@app.post("/auth/admin-login")
+async def auth_admin_login(request: Request, payload: AdminEmailLoginRequest) -> Dict[str, Any]:
+    email = _normalize_email(payload.email)
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Enter a valid admin email")
+    if _derive_user_role(email) != ROLE_ADMIN:
+        raise HTTPException(status_code=403, detail="This account does not have admin access")
+
+    candidate_hash = _hash_password(payload.password)
+    async with DB_LOCK:
+        record = USERS_DB.get(email)
+
+    if record:
+        stored_hash = str(record.get("password_hash") or "")
+        if stored_hash and stored_hash != candidate_hash:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        synced = await _upsert_user(
+            email=email,
+            name=str(record.get("name") or "Administrator"),
+            provider="email",
+            avatar=str(record.get("avatar") or ""),
+            password_hash=candidate_hash if not stored_hash else "",
+        )
+    else:
+        synced = await _upsert_user(
+            email=email,
+            name="Administrator",
+            provider="email",
+            avatar="",
+            password_hash=candidate_hash,
+        )
+
+    session_user = _session_user_from_record(synced)
+    if not _is_admin_user(session_user):
+        raise HTTPException(status_code=403, detail="Admin role missing for this account")
     request.session["auth_user"] = session_user
     return {"ok": True, "user": session_user}
 
@@ -986,37 +1151,42 @@ async def crm_newsletter(payload: NewsletterRequest) -> Dict[str, Any]:
 @app.get("/stock-updates")
 async def stock_updates(request: Request) -> Dict[str, Any]:
     user = await _require_session_user(request)
+    admin_access = _is_admin_user(user)
     premium_active = bool(user.get("premium"))
     async with DB_LOCK:
         ordered = sorted(STOCK_UPDATES_DB.values(), key=lambda item: int(item.get("updated_at") or 0), reverse=True)
+    if not admin_access:
+        return {
+            "items": [],
+            "locked_count": len(ordered),
+            "premium_active": premium_active,
+            "plan": str(user.get("plan") or ""),
+            "admin_only": True,
+        }
     visible: List[Dict[str, Any]] = []
     locked_count = 0
     for update in ordered:
-        visibility = str(update.get("visibility") or "premium").lower()
-        if visibility == "public" or premium_active:
-            visible.append(dict(update))
-        else:
-            locked_count += 1
+        visible.append(dict(update))
     return {
         "items": visible,
         "locked_count": locked_count,
         "premium_active": premium_active,
         "plan": str(user.get("plan") or ""),
+        "admin_only": False,
     }
 
 
 @app.get("/stock-updates/{symbol}")
 async def stock_update_symbol(request: Request, symbol: str) -> Dict[str, Any]:
     user = await _require_session_user(request)
+    if not _is_admin_user(user):
+        raise HTTPException(status_code=403, detail="Admin login required to access admin stock updates")
     premium_active = bool(user.get("premium"))
     symbol_clean = _normalize_symbol(symbol)
     async with DB_LOCK:
         update = next((dict(item) for item in STOCK_UPDATES_DB.values() if str(item.get("symbol") or "") == symbol_clean), None)
     if not update:
         raise HTTPException(status_code=404, detail=f"No admin update for {symbol_clean}")
-    visibility = str(update.get("visibility") or "premium").lower()
-    if visibility == "premium" and not premium_active:
-        raise HTTPException(status_code=402, detail="Upgrade required to access this update")
     return {"item": update, "premium_active": premium_active}
 
 
@@ -1042,6 +1212,9 @@ async def payments_create_checkout(request: Request, payload: PaymentCreateReque
     }
     async with DB_LOCK:
         PAYMENTS_DB[checkout_id] = payment
+    
+    # Persist after DB lock is released
+    await _persist_data()
     return {"ok": True, "checkout": payment}
 
 
@@ -1073,6 +1246,9 @@ async def payments_complete(request: Request, payload: PaymentCompleteRequest) -
     updated_user = await _set_user_premium(email, premium_target, plan_key if premium_target else "")
     session_user = _session_user_from_record(updated_user)
     request.session["auth_user"] = session_user
+    
+    # Persist after all updates (note: _set_user_premium already persists)
+    await _persist_data()
     return {
         "ok": True,
         "payment": payment,
@@ -1138,8 +1314,35 @@ async def admin_users(request: Request) -> Dict[str, Any]:
     _require_admin(request)
     async with DB_LOCK:
         users = [dict(record) for record in USERS_DB.values()]
+        contacts = [dict(record) for record in CONTACTS_DB]
+
+    contact_count_by_email: Dict[str, int] = {}
+    latest_contact_by_email: Dict[str, Dict[str, Any]] = {}
+    for contact in contacts:
+        email = _normalize_email(contact.get("email") or "")
+        if not email:
+            continue
+        contact_count_by_email[email] = int(contact_count_by_email.get(email, 0)) + 1
+        previous = latest_contact_by_email.get(email)
+        if not previous or int(contact.get("timestamp") or 0) >= int(previous.get("timestamp") or 0):
+            latest_contact_by_email[email] = contact
+
     users.sort(key=lambda item: int(item.get("updated_at") or 0), reverse=True)
-    return {"items": [_public_user_record(record) for record in users]}
+    result: List[Dict[str, Any]] = []
+    for record in users:
+        row = _public_user_record(record)
+        email = _normalize_email(row.get("email") or "")
+        latest_contact = latest_contact_by_email.get(email) or {}
+        row["contact_count"] = max(int(row.get("contact_count") or 0), int(contact_count_by_email.get(email, 0)))
+        row["contact_email"] = str(latest_contact.get("email") or row.get("email") or "")
+        row["contact_name"] = str(latest_contact.get("name") or row.get("name") or "")
+        row["contact_type"] = str(latest_contact.get("type") or "")
+        row["contact_role"] = str(latest_contact.get("role") or "")
+        row["contact_note"] = str(latest_contact.get("note") or "")
+        row["last_contact_at"] = int(latest_contact.get("timestamp") or 0)
+        result.append(row)
+
+    return {"items": result}
 
 
 @app.get("/admin/contacts")
@@ -1206,6 +1409,9 @@ async def admin_create_or_update_stock_update(request: Request, payload: AdminSt
                 "version": 1,
             }
             STOCK_UPDATES_DB[update_id] = update
+    
+    # Persist after DB lock is released
+    await _persist_data()
     return {"ok": True, "item": update}
 
 
